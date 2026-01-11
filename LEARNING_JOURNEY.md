@@ -58,7 +58,7 @@ htop                               # Interactive monitor
 
 | Concept | Understanding | Implementation |
 |---------|---------------|----------------|
-| TCP/IP | How data travels | Firewall rules by port |
+| TCP/IP | How data travels | Firewall rules  port |
 | Ports | Service endpoints | 22 (SSH), 80 (HTTP), 443 (HTTPS) |
 | DNS | Domain resolution | Configured A record |
 | TLS/SSL | Encrypted communication | Let's Encrypt certificate |
