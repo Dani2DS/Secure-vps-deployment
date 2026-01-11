@@ -1,0 +1,141 @@
+# =============================================================================
+# Fail2Ban Configuration - jail.local
+# =============================================================================
+# 
+# This is an example configuration file for fail2ban with escalating bans.
+# Copy this file to /etc/fail2ban/jail.local and adjust as needed.
+#
+# Features:
+# - Exponential ban time increase for repeat offenders
+# - SSH brute-force protection
+# - Nginx authentication protection
+# - Recidive jail for persistent attackers
+#
+# =============================================================================
+
+[DEFAULT]
+# Default ban time: 1 hour
+bantime = 1h
+
+# Time window to count failures: 10 minutes
+findtime = 10m
+
+# Max failures before ban
+maxretry = 5
+
+# IPs to never ban (your own IP, localhost)
+ignoreip = 127.0.0.1/8 ::1
+
+# Email notifications (optional - requires mail server)
+# destemail = admin@example.com
+# sender = fail2ban@example.com
+# mta = sendmail
+# action = %(action_mwl)s
+
+# -----------------------------------------------------------------------------
+# ESCALATING BAN SYSTEM
+# -----------------------------------------------------------------------------
+# Each subsequent ban multiplies duration by factor
+# 1st ban:  1 hour
+# 2nd ban:  1 hour × 24 = 24 hours
+# 3rd ban:  24 hours × 24 = 24 days
+# 4th ban:  Limited to maxtime (52 weeks)
+# -----------------------------------------------------------------------------
+
+bantime.increment = true
+bantime.factor = 24
+bantime.maxtime = 52w
+
+# =============================================================================
+# SSH JAIL
+# =============================================================================
+# Protects SSH from brute-force password attacks
+# Even with key-only auth, this stops bots from wasting resources
+
+[sshd]
+enabled = true
+port = 22
+logpath = /var/log/auth.log
+backend = auto
+
+# Strict settings for SSH
+maxretry = 3
+bantime = 1h
+findtime = 10m
+
+# =============================================================================
+# NGINX AUTHENTICATION JAIL
+# =============================================================================
+# Protects HTTP Basic Auth from brute-force
+
+[nginx-auth]
+enabled = true
+port = 80,443
+filter = nginx-auth
+logpath = /var/log/nginx/*_access.log
+backend = auto
+
+maxretry = 5
+bantime = 1h
+findtime = 10m
+
+# =============================================================================
+# RECIDIVE JAIL (for repeat offenders)
+# =============================================================================
+# If an IP gets banned 3+ times in one day, ban for 1 week on ALL ports
+
+[recidive]
+enabled = true
+logpath = /var/log/fail2ban.log
+banaction = %(banaction_allports)s
+backend = auto
+
+# 3 bans in 1 day = 1 week ban
+maxretry = 3
+findtime = 1d
+bantime = 1w
+
+# =============================================================================
+# ADDITIONAL JAILS (Optional)
+# =============================================================================
+
+# [nginx-botsearch]
+# enabled = true
+# port = 80,443
+# filter = nginx-botsearch
+# logpath = /var/log/nginx/*_access.log
+# maxretry = 2
+# bantime = 1d
+
+# [nginx-http-auth]
+# enabled = true
+# port = 80,443
+# filter = nginx-http-auth
+# logpath = /var/log/nginx/*_error.log
+# maxretry = 3
+# bantime = 1h
+
+# =============================================================================
+# USEFUL COMMANDS
+# =============================================================================
+#
+# Check status:
+#   fail2ban-client status
+#   fail2ban-client status sshd
+#
+# Manually ban IP:
+#   fail2ban-client set sshd banip 192.168.1.100
+#
+# Manually unban IP:
+#   fail2ban-client set sshd unbanip 192.168.1.100
+#
+# Check banned IPs:
+#   fail2ban-client status sshd | grep "Banned IP"
+#
+# View fail2ban log:
+#   tail -f /var/log/fail2ban.log
+#
+# Test filter regex:
+#   fail2ban-regex /var/log/auth.log /etc/fail2ban/filter.d/sshd.conf
+#
+# =============================================================================

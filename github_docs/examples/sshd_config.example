@@ -1,0 +1,182 @@
+# =============================================================================
+# SSH Server Configuration - Hardened
+# =============================================================================
+#
+# This is an example of a hardened sshd_config file.
+# Location: /etc/ssh/sshd_config
+#
+# IMPORTANT: Before applying these changes:
+# 1. Make a backup: cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup
+# 2. Set up SSH keys BEFORE disabling password authentication
+# 3. Test in a new terminal BEFORE closing your current session
+#
+# =============================================================================
+
+# =============================================================================
+# NETWORK AND PROTOCOL
+# =============================================================================
+
+# Port to listen on (default: 22)
+# Consider changing to a non-standard port for security through obscurity
+# Note: Update firewall rules if you change this
+Port 22
+
+# Only use IPv4 (use "any" for both IPv4 and IPv6)
+AddressFamily inet
+
+# Only allow SSH protocol version 2 (more secure)
+Protocol 2
+
+# =============================================================================
+# AUTHENTICATION
+# =============================================================================
+
+# CRITICAL: Disable root login
+# This is one of the most important security settings
+PermitRootLogin no
+
+# CRITICAL: Disable password authentication (use SSH keys instead)
+# Only enable this AFTER you've verified SSH key login works!
+PasswordAuthentication no
+
+# Allow public key authentication
+PubkeyAuthentication yes
+
+# Location of authorized keys file
+AuthorizedKeysFile .ssh/authorized_keys
+
+# Disable empty passwords
+PermitEmptyPasswords no
+
+# Disable challenge-response authentication
+ChallengeResponseAuthentication no
+
+# Disable Kerberos authentication (unless you need it)
+KerberosAuthentication no
+
+# Disable GSSAPI authentication (unless you need it)
+GSSAPIAuthentication no
+
+# =============================================================================
+# BRUTE FORCE PROTECTION
+# =============================================================================
+
+# Maximum authentication attempts per connection
+# Low value helps against brute force attacks
+MaxAuthTries 3
+
+# Time (in seconds) to complete authentication
+# If user doesn't authenticate in this time, connection is dropped
+LoginGraceTime 60
+
+# Maximum number of concurrent unauthenticated connections
+MaxStartups 10:30:60
+
+# =============================================================================
+# SESSION SETTINGS
+# =============================================================================
+
+# Maximum number of open sessions per network connection
+MaxSessions 3
+
+# Disconnect after this many seconds of inactivity
+# Set to 0 to disable
+ClientAliveInterval 300
+ClientAliveCountMax 2
+
+# =============================================================================
+# SECURITY FEATURES
+# =============================================================================
+
+# Use privilege separation (sandbox)
+UsePrivilegeSeparation sandbox
+
+# Enable strict mode (check file permissions)
+StrictModes yes
+
+# Don't allow users to set environment variables
+PermitUserEnvironment no
+
+# Disable TCP forwarding (unless you need it)
+AllowTcpForwarding no
+
+# Disable X11 forwarding (unless you need it)
+X11Forwarding no
+
+# Disable agent forwarding (unless you need it)
+AllowAgentForwarding no
+
+# =============================================================================
+# LOGGING
+# =============================================================================
+
+# Log level (VERBOSE logs more details for security auditing)
+LogLevel VERBOSE
+
+# Facility for syslog
+SyslogFacility AUTH
+
+# =============================================================================
+# BANNER AND MESSAGES
+# =============================================================================
+
+# Display a warning banner before authentication
+# Create the file first: /etc/ssh/banner
+# Banner /etc/ssh/banner
+
+# Print /etc/motd after login
+PrintMotd yes
+
+# Print last login time
+PrintLastLog yes
+
+# =============================================================================
+# USER/GROUP RESTRICTIONS (Optional)
+# =============================================================================
+
+# Only allow specific users to connect (uncomment and add usernames)
+# AllowUsers appuser admin
+
+# Only allow specific groups to connect (uncomment and add group names)
+# AllowGroups sshusers sudo
+
+# Deny specific users (uncomment and add usernames)
+# DenyUsers guest test
+
+# =============================================================================
+# CRYPTOGRAPHY (Optional - Advanced)
+# =============================================================================
+
+# Specify allowed ciphers (modern, secure ciphers only)
+# Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+
+# Specify allowed MACs
+# MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+
+# Specify allowed key exchange algorithms
+# KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org
+
+# =============================================================================
+# SFTP (if needed)
+# =============================================================================
+
+# Enable SFTP subsystem
+Subsystem sftp /usr/lib/openssh/sftp-server
+
+# =============================================================================
+# APPLY CHANGES
+# =============================================================================
+#
+# After modifying this file:
+#
+# 1. Test configuration for syntax errors:
+#    sudo sshd -t
+#
+# 2. If no errors, restart SSH service:
+#    sudo systemctl restart ssh
+#
+# 3. TEST IN A NEW TERMINAL before closing current session!
+#
+# 4. If locked out, use cloud provider's console access to fix
+#
+# =============================================================================
